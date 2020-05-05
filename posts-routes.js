@@ -26,16 +26,26 @@ router.post('/', (req, res) => {
 })
 
 router.post("/:id/comments", (req, res) => {
-    Posts.insertComment(req.body)
-    .then(comm => {
-        res.status(201).json(comm)
+    Posts.findById(req.params.id)
+    .then(post => {
+        if(post.length===0){
+            res.status(404).json({
+                status: 404,
+                statusMsg: "Resource not found",
+                errorMessage: "Post with specified ID does not exist"
+            })
+        }else{ Posts.insertComment(req.body)
+            .then(comm => {
+                res.status(201).json(comm)
+            })
+            .catch(err => {
+                res.status(404).json({
+                    errorMessage: "There was an error adding your comment",
+                    error: err
+                })
+            })}
     })
-    .catch(err => {
-        res.status(404).json({
-            errorMessage: "There was an error adding your comment",
-            error: err
-        })
-    })
+   
 })
 
 
