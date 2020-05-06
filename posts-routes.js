@@ -34,12 +34,18 @@ router.post("/:id/comments", (req, res) => {
                 statusMsg: "Resource not found",
                 errorMessage: "Post with specified ID does not exist"
             })
+        }else if(!req.body.text){
+            res.status(400).json({
+                status: 400,
+                statusMsg: "Bad Request",
+                errorMessage: "Please provide text for comment"
+            })
         }else{ Posts.insertComment(req.body)
             .then(comm => {
                 res.status(201).json(comm)
             })
             .catch(err => {
-                res.status(404).json({
+                res.status(500).json({
                     errorMessage: "There was an error adding your comment",
                     error: err
                 })
@@ -66,10 +72,12 @@ router.get('/:id', (req, res) => {
     Posts.findById(req.params.id)
     .then(post => {
         if(post.length != 0){
-            res.status(200),json(post)
+            res.status(200).json(post)
 
         }else{
             res.status(404).json({
+                status: 404,
+                statusMsg: "Resource not found",
                 errorMessage: "item not found"
             })
         }
@@ -77,23 +85,34 @@ router.get('/:id', (req, res) => {
     .catch(error => {
         res.status(500).json({
             errorMessage: "Error loading post",
-            error: error
+            error: error.message
         })
     })
 })
 
 router.get('/:id/comments', (req, res) => {
-    Posts.findPostComments(req.params.id)
-    .then(comments => {
-        res.status(200).json({
-            data: comments
+    Posts.findById(req.params.id)
+    .then(post => {
+        if(post.length===0){
+            res.status(404).json({
+                status: 404,
+                statusMsg: "Resource not found",
+                errorMessage: "Post with specified ID does not exist"
+            })
+        }else{ 
+        Posts.findPostComments(req.params.id)
+        .then(comments => {
+            res.status(200).json({
+                data: comments
+            })
         })
-    })
-    .catch(error => {
-        res.status(500).json({
-            errorMessage: "Error Loading Comments",
-            error: error
+        .catch(error => {
+            res.status(500).json({
+                errorMessage: "Error Loading Comments",
+                error: error
+            })
         })
+    }
     })
 })
 
@@ -108,6 +127,36 @@ router.get('/:id/comments', (req, res) => {
 //         })
 //     })
 // })
+
+router.put('/:id', (req, res)=> {
+    Posts.findById(req.params.id)
+    .then(post => {
+        if(post.length = 0){
+            res.status(404).json({
+                status: 404,
+                statusMsg: "Resource not found",
+                errorMessage: "Post with specified ID does not exist"
+            })
+        }else if(req.body.title.length == 0 || req.body.contents.length == 0){
+            res.status(400).json({
+                status: 404,
+                statusMsg: "Bad Request",
+                errorMessage: "Please provide title and contents for the post"
+            })
+        }else{
+            Posts.update(req.params.id, req.body)
+            .then(resp => {
+                res.status(201).json({
+                    status: 201,
+                    statusMsg: "Updated Successfully"
+                })
+            })
+            .catch(err=> {
+                res.status(500).json(err)
+            })
+        } 
+})
+})
 
 
 module.exports = router;
