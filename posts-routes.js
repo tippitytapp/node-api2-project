@@ -116,17 +116,39 @@ router.get('/:id/comments', (req, res) => {
     })
 })
 
-// router.delete('/:id', (req, res)=>{
-//     const id = req.params.id
-//     const deletedPost = Posts.findById(id)
-//     Posts.remove(id)
-//     .then(resp => {
-//         res.status(204).json({
-//             deleted: deletedPost,
-//             numberOfPostsDeleted: resp
-//         })
-//     })
-// })
+router.delete('/:id', (req, res) => {
+    let deletedPost = [];
+    Posts.findById(req.params.id)
+        .then(post => {
+            deletedPost = post;
+            Posts.remove(req.params.id)
+                .then(count => {
+                    if (count > 0) {
+                        res.status(200).json(deletedPost);
+                    } else {
+                        res.status(404).json({
+                            status: 404,
+                            statusMsg: "Resource not found", 
+                            errorMessage: "The post with the specified ID does not exist." 
+                        });
+                    }
+                })
+                .catch(error => {
+                    res.status(500).json({
+                        error: "The post could not be retrieved."
+                    });
+                })
+
+        })
+        .catch(error => {
+            // log error to database
+            console.log(error);
+            res.status(500).json({
+                error: "The post information could not be retrieved."
+            });
+        });
+
+})
 
 router.put('/:id', (req, res)=> {
     Posts.findById(req.params.id)
@@ -146,8 +168,8 @@ router.put('/:id', (req, res)=> {
         }else{
             Posts.update(req.params.id, req.body)
             .then(resp => {
-                res.status(201).json({
-                    status: 201,
+                res.status(200).json({
+                    status: 200,
                     statusMsg: "Updated Successfully"
                 })
             })
