@@ -3,12 +3,12 @@ const colors = require('colors');
 const PostsRouter = require('./posts-routes')
 
 const server = express();
-const PORT = 4302;
+const port = process.env.PORT || 4403;
 
 server.use(express.json());
 
-server.listen(PORT, () => {
-    console.log(`\n === SERVER LISTENING ON PORT ${PORT} === \n`.bgWhite.red.bold)
+server.listen(port, () => {
+    console.log(`\n === SERVER LISTENING ON PORT ${port} === \n`.bgWhite.red.bold)
 })
 
 server.get('/', (req, res)=> {
